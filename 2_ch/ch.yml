@@ -1,0 +1,44 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "repl-01"
+spec:
+  configuration:
+    zookeeper:
+      nodes:
+        - host: zookeeper.default # service.namespace, `default` is the default namespace so could use just `zookeeper` but I am being explicit to show config
+    clusters:
+      - name: replcluster
+        layout:
+          shardsCount: 1 # leave as 1
+          replicasCount: 2
+        templates:
+          podTemplate: clickhouse-with-volume-template
+          volumeClaimTemplate: clickhouse-storage-template
+    settings:
+      storage_configuration/disks/s3/type: s3
+      storage_configuration/disks/s3/endpoint: $S3_ENDPOINT
+      storage_configuration/disks/s3/access_key_id: $ACCESS_KEY_ID
+      storage_configuration/disks/s3/secret_access_key: $SECRET_ACCESS_KEY
+      storage_configuration/policies/s3/volumes/s3/disk: s3
+      merge_tree/allow_remote_fs_zero_copy_replication: true
+  templates:
+    podTemplates:
+      - name: clickhouse-with-volume-template
+        spec:
+          containers:
+            - name: clickhouse-pod
+              image: clickhouse/clickhouse-server:23.3
+              volumeMounts:
+                - name: clickhouse-storage-template
+                  mountPath: /var/lib/clickhouse
+    volumeClaimTemplates:
+      - name: clickhouse-storage-template
+        spec:
+          # no storageClassName - means use default storageClassName
+          storageClassName: do-block-storage
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi

@@ -7,4 +7,3 @@ You need to have decent sized disks for ZK and CH so that there is plenty of spa
 See for resizable:
 https://github.com/Altinity/clickhouse-operator/blob/master/docs/chi-examples/03-persistent-volume-05-resizeable-volume-1.yaml
 https://github.com/Altinity/clickhouse-operator/blob/master/docs/chi-examples/03-persistent-volume-05-resizeable-volume-2.yaml
-# AltinityClickhouseOperatorExample
