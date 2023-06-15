@@ -10,3 +10,14 @@ https://github.com/Altinity/clickhouse-operator/blob/master/docs/chi-examples/03
 
 
 See for backing up S3 tables without replicating data (just copying the metadata): https://blog.danthegoodman.com/backing-up-clickhouse-s3-disk-tables-without-duplicating-data
+
+Make sure you are using `Replicated*` tables (see https://github.com/Altinity/clickhouse-operator/blob/master/docs/replication_setup.md). If you lose zookeeper, you can run `system restore replica` on every node to restore the info, event if using zero copy replication.
+
+```
+$ cat restore_meta.sql
+select 'system restore replica '|| database||'.'|| table||';' from system.replicas where is_readonly format TSVRaw;
+
+$ clickhouse-client < restore_meta.sql |clickhouse-client -mn
+```
+
+Thanks to Denny Crane for this (writing down for docs), this restores all replicas on the current node.
